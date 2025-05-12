@@ -1,0 +1,14 @@
+pymongo
+python-dotenv
+flask
+flask-cors
+apscheduler
+faker
+pytz
+slack_sdk
+
+
+# uncomment for testing
+# pytest
+# pytest-cov
+# pytest-mock

@@ -1,0 +1,36 @@
+image: python:3.10  # Use Python 3.10 (adjust as needed)
+
+services:
+  - name: mongo:5.0  # You can change to the Mongo version you need
+    alias: mongo
+
+stages:
+  - test
+
+variables:
+  MONGO_URI: "mongodb://mongo:27017"
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PYTHONPATH: "."
+
+before_script:
+  - apt-get update && apt-get install -y netcat-openbsd
+  - python -m venv venv  # Create a virtual environment
+  - source venv/bin/activate
+  - pip install --upgrade pip
+  - pip install -r requirements.txt  # Install dependencies
+  - pip install pytest pytest-cov pytest-mock
+
+test:
+  stage: test
+  script:
+    - echo "Waiting for MongoDB to be ready..."
+    - until nc -z mongo 27017; do sleep 1; done  # Wait for MongoDB to be ready
+    - python -m pytest --maxfail=5 --disable-warnings --cov=app --junitxml=report.xml tests/  # Run tests
+    - ls -la
+  artifacts:
+    reports:
+      junit: report.xml
+    paths:
+      - coverage.xml
+      - report.xml
+  allow_failure: false
